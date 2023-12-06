@@ -11,13 +11,15 @@ import (
 func get_gears(input []string) [][][]int {
 	re := regexp.MustCompile(`[\*]`)
 	var point [][]int
-  var points [][][]int
-
+	var points [][][]int
 
 	for _, str := range input {
 		point = re.FindAllStringIndex(str, -1)
 		if point != nil {
-      points = append(points,point)
+			points = append(points, point)
+		} else {
+
+			points = append(points, point)
 		}
 	}
 	return points
@@ -58,16 +60,13 @@ func get_nums(input []string) ([]int, [][][]int) {
 		}
 
 	}
-	fmt.Println(numIdx)
-	fmt.Println(nums)
 
 	return nums, numIdx
 }
 
-
 func main() {
-	var sum int
 	filePath := os.Args[1]
+	var sum int
 	readFile, err := os.Open(filePath)
 	if err != nil {
 		fmt.Println(err)
@@ -79,53 +78,42 @@ func main() {
 		lines = append(lines, fileScanner.Text())
 	}
 	readFile.Close()
-	count := 0
-	nums, numIdx := get_nums(lines)
+	_, numIdx := get_nums(lines)
+	gears := get_gears(lines)
+	var gear_parts [][]int
+	fmt.Println(gears)
 
-	for i, idxs := range numIdx {
-		line := lines[i]
+	for i, grs := range gears {
+		for _, gear := range grs {
+			var gear_part []int
+			if len(gear) > 0 {
+				for k, idxs := range numIdx {
+					if len(idxs) > 0 {
+						for _, idx := range idxs {
 
-		for _, idx := range idxs {
-			num := nums[count]
-			var xl, xu, yl, yu int
-			if i > 0 {
-				yl = i - 1
-			} else {
-				yl = i
+							if (i >= k-1 && i <= k+1) && (gear[0] >= idx[0]-1 && gear[0] <= idx[1]) {
+                num, _ := strconv.Atoi(lines[k][idx[0]:idx[1]])
+                fmt.Println("idx ",idx)
+                fmt.Println("gear ",gear)
+                fmt.Println(num)
+								gear_part = append(gear_part, num)
+							}
+						}
+					}
+				}
 			}
-			if i < len(lines)-1 {
-				yu = i + 2
-			} else {
-				yu = i + 1
-			}
-			if idx[0] > 0 {
-				xl = idx[0] - 1
-			} else {
-				xl = idx[0]
-			}
-			if idx[1] < len(line) {
-				xu = idx[1] + 1
-			} else {
-				xu = idx[1]
-			}
-			block := lines[yl:yu]
-			var input []string
-			for _, l := range block {
-				input = append(input, l[xl:xu])
-			}
-			// fmt.Println(input)
-
-			fmt.Println(num, "  --  ", input)
-			if get_syms(input) {
-				sum += num
-			} else {
-				fmt.Println(num)
-			}
-			count += 1
+			gear_parts = append(gear_parts, gear_part)
 
 		}
-
 	}
-	fmt.Println(sum)
+	for _, gp := range gear_parts {
+    fmt.Println(gp)
+		if len(gp) == 2 {
+      fmt.Println(gp[0]*gp[1])
+			sum = sum + (gp[0] * gp[1])
+
+		}
+	}
+  fmt.Println(sum)
 
 }
