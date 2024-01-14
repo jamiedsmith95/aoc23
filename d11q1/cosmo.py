@@ -16,7 +16,7 @@ class Galaxy:
         if self == other:
             return 0
         else:
-            return ydiff + xdiff +1
+            return ydiff + xdiff
 
     def __eq__(self,other):
         return self.x == other.x and self.y == other.y
@@ -24,8 +24,6 @@ class Galaxy:
 class Galaxies:
     def __init__(self,file_name):
         self.read_file(file_name)
-        for line in self.lines:
-            print(line)
         self.expansion()
         for line in self.lines:
             print(line)
@@ -48,20 +46,28 @@ class Galaxies:
             if '#' in line:
                 pass
             else:
+                print(i)
                 self.lines.insert(i,line)
         indexs = []
         for i in range(len(lines[0])-1,-1,-1):
-            if '#' in lines[:][i]:
+            column = [lines[j][i] for j in range(len(lines[i]))]
+            if '#' in column:
                 pass
             else:
                 indexs.append(i)
+        print(indexs)
         for i in range(len(self.lines)):
             line = self.lines[i]
-            for index in indexs[::-1]:
-                line = line[:index] + '.' + line[index:]
+            for index in sorted(indexs,reverse=True):
+                if  index < len(line)-1:
+                    line = line[:index] + '.' + line[index:]
+                else:
+                    line = line + '.'
             self.lines[i] = line
 
             
+
+
     def get_steps(self):
         steps = {}
         total_steps = 0
@@ -71,10 +77,10 @@ class Galaxies:
             for j in range(len(self.galaxies.values())):
                 other = self.galaxies[j+1]
                 step.append(galaxy.get_steps(other))
-            total_steps += sum(step)
+            total_steps += sum(step[i:])
             steps[galaxy.id] = step
         self.steps = steps
-        self.total_steps = total_steps/2
+        self.total_steps = total_steps
 
 
     def find_galaxies(self):
